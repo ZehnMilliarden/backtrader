@@ -4,6 +4,9 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 from datetime import datetime
 
+import runtime
+runtime.CurrentWorkPathInstance.AddCurrentWorkPath()
+
 import pandas as pd
 import backtrader as bt
 
