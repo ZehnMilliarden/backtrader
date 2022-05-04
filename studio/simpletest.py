@@ -10,7 +10,7 @@ runtime.CurrentWorkPathInstance.AddCurrentWorkPath()
 import pandas as pd
 import backtrader as bt
 
-class TestStrategy(bt.Strategy):
+class TestStrategyDefault(bt.Strategy):
 
     def log(self, txt, dt=None):
         ''' 提供记录功能 '''
@@ -19,16 +19,41 @@ class TestStrategy(bt.Strategy):
 
     def __init__(self):
         # 引用到 输入数据的close价格
+        self.log('TestStrategyDefault __init__')
         self.dataclose = self.datas[0].close
 
     def next(self):
-        self.log('Close, %.2f' % self.dataclose[0])
+        self.log('TestStrategyDefault Close, %.2f' % self.dataclose[0])
+
+class TestStrategyPlanA(TestStrategyDefault):
+
+    def __init__(self):
+        # 引用到 输入数据的close价格
+        TestStrategyDefault.__init__(self)
+
+    def next(self):
+        self.log('TestStrategyPlanA Close, %.2f' % self.dataclose[0])
+
+class TestStrategyManager:
+
+    def __init__(self):
+        self.__StrategyType = 0
+
+    def SetStrategy(self, StrategyType):
+        self.__StrategyType=StrategyType
+
+    def GetStrategy(self):
+        if self.__StrategyType == 0:
+            return TestStrategyPlanA
+        return TestStrategyDefault
 
 if __name__ == '__main__':
 
     cerebro = bt.Cerebro()
 
-    cerebro.addstrategy(TestStrategy)
+    strategyManager = TestStrategyManager()
+
+    cerebro.addstrategy(strategyManager.GetStrategy())
 
     stock_data_raw = pd.read_csv('datas\yhoo-2014.txt', index_col='Date', parse_dates=True)
     # print(stock_data_raw)
