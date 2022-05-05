@@ -33,6 +33,51 @@ class TestStrategyPlanA(TestStrategyDefault):
 
     def next(self):
         self.log('TestStrategyPlanA Close, %.2f' % self.dataclose[0])
+        if self.dataclose[0] < self.dataclose[-1] and self.dataclose[-1] < self.dataclose[-2]:
+            # 连续下跌两天就买入
+            self.log('TestStrategyPlanA buy create %.2f' % self.dataclose[0])
+            self.buy()
+
+class TestStrategyPlanB(TestStrategyDefault):
+
+    def __init__(self):
+        # 引用到 输入数据的close价格
+        TestStrategyDefault.__init__(self)
+        self.order = None
+
+    def notify_order(self, order):
+        if order.status in [order.Submitted, order.Accepted]:
+            return
+        
+        if order.status in [order.Completed]:
+            if order.isbuy():
+                self.log('TestStrategyPlanB buy execute: %.2f' % order.executed.price)
+            else:
+                self.log('TestStrategyPlanB sell execute: %.2f' % order.executed.price)
+
+            self.bar_executed = len(self)
+        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
+           self.log('Order Canceled/Margin/Rejected')
+        
+        self.order=None
+
+    def next(self):
+        self.log('TestStrategyPlanB Close, %.2f' % self.dataclose[0])
+
+        if self.order:
+            return
+
+        if not self.position:
+
+            if self.dataclose[0] < self.dataclose[-1] and self.dataclose[-1] < self.dataclose[-2]:
+                # 连续下跌两天就买入
+                self.log('TestStrategyPlanB buy create %.2f' % self.dataclose[0])
+                self.buy()
+        else:
+            
+            if len(self) >= self.bar_executed+5:
+                self.log('TestStrategyPlanB sell create %.2f' % self.dataclose[0])
+                self.order = self.sell()
 
 class TestStrategyManager:
 
@@ -44,7 +89,11 @@ class TestStrategyManager:
 
     def GetStrategy(self):
         if self.__StrategyType == 0:
+            return TestStrategyDefault
+        elif self.__StrategyType == 1:
             return TestStrategyPlanA
+        elif self.__StrategyType == 2:
+            return TestStrategyPlanB
         return TestStrategyDefault
 
 if __name__ == '__main__':
@@ -52,6 +101,7 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
 
     strategyManager = TestStrategyManager()
+    strategyManager.SetStrategy(2)
 
     cerebro.addstrategy(strategyManager.GetStrategy())
 
