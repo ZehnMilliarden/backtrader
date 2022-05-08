@@ -9,21 +9,34 @@ import pandas
 from datetime import datetime
 
 from .strategy_manager import TestStrategyManager
+from .default_strategy import TestStrategyDefault
 
 class TestManager():
 
     __version__ = '1.0'
 
-    def run(strategy_name):
+    __strategy_name = TestStrategyDefault.__name__
+
+    __data_path = 'datas\yhoo-2014.txt'
+
+    def set_strategy_name(self, strategy_name):
+        self.__strategy_name = strategy_name
+        return True
+
+    def set_data_path(self, data_name):
+        self.__data_path = data_name
+        return True
+
+    def run(self):
         cerebro = backtrader.Cerebro()
 
         strategyManager = TestStrategyManager()
-        strategyManager.SetStrategy(strategy_name)
+        strategyManager.SetStrategy(self.__strategy_name)
 
         cerebro.addstrategy(strategyManager.GetStrategy())
 
         stock_data_raw = pandas.read_csv(
-            'datas\yhoo-2014.txt', index_col='Date', parse_dates=True)
+            self.__data_path, index_col='Date', parse_dates=True)
         # print(stock_data_raw)
 
         start_date = datetime(2014, 1, 2)
@@ -40,5 +53,6 @@ class TestManager():
         cerebro.run()
         print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
+        return True
 # if __name__ == '__main__':
 #     print(TestManager.__name__ + ' version:' + TestManager.__version__)

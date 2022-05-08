@@ -5,4 +5,7 @@ from Strategy.test_manager import TestManager
 from Strategy.test_strategy_b import TestStrategyPlanB
 
 if __name__ == '__main__':
-    TestManager.run(TestStrategyPlanB.__name__)
+    testManager = TestManager()
+    testManager.set_strategy_name(TestStrategyPlanB.__name__)
+    testManager.set_data_path('datas\yhoo-2014.txt')
+    testManager.run()
