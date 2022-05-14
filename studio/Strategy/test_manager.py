@@ -19,6 +19,8 @@ class TestManager():
 
     __data_path = 'datas\yhoo-2014.txt'
 
+    __commission = 0.0005
+
     def set_strategy_name(self, strategy_name):
         self.__strategy_name = strategy_name
         return True
@@ -27,12 +29,17 @@ class TestManager():
         self.__data_path = data_name
         return True
 
+    def set_commission(self, commission):
+        self.__commission = commission
+        return True
+
     def run(self):
         cerebro = backtrader.Cerebro()
 
         strategyManager = TestStrategyManager()
         strategyManager.SetStrategy(self.__strategy_name)
 
+        # 添加策略
         cerebro.addstrategy(strategyManager.GetStrategy())
 
         stock_data_raw = pandas.read_csv(
@@ -45,9 +52,14 @@ class TestManager():
         stock_data = backtrader.feeds.PandasData(
             dataname=stock_data_raw, fromdate=start_date, todate=end_date)
 
+        # 添加测试数据
         cerebro.adddata(stock_data)
 
+        # 本金设置
         cerebro.broker.setcash(100000.0)
+
+        # 佣金设置
+        cerebro.broker.setcommission(self.__commission)
 
         print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
         cerebro.run()
