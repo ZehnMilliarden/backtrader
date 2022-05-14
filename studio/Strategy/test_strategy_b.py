@@ -12,24 +12,56 @@ class TestStrategyPlanB(TestStrategyDefault):
 
     # 订单状态变更
     def notify_order(self, order):
+
+        if self.order is None:
+            return
+
         if order.status in [order.Submitted, order.Accepted]:
             # 订单状态处于，提交订单, 订单被接受
             return
         
         if order.status in [order.Completed]:
+
+            order.executed.log()
+
             if order.isbuy():
-                self.log('TestStrategyPlanB buy execute: %.2f' % order.executed.price)
+
+                # order.executed.price 订单单价
+                # order.executed.value 订单价值
+                # order.executed.comm  订单佣金
+
+                self.log('TestStrategyPlanB buy execute Size:%d Price: %.2f, Cost: %.2f, Comm: %.2f' % 
+                    (order.executed.size,
+                     order.executed.price, 
+                     order.executed.value,
+                     order.executed.comm))
+
             elif order.issell():
-                self.log('TestStrategyPlanB sell execute: %.2f' % order.executed.price)
+
+                # 同上
+
+                self.log('TestStrategyPlanB sell execute Size:%d Price: %.2f, Cost: %.2f, Comm: %.2f' % 
+                    (order.executed.size,
+                     order.executed.price, 
+                     order.executed.value,
+                     order.executed.comm))
             else:
                 self.log('TestStrategyPlanB unrecorgnized order: %s' % order.status)
 
             # 执行完毕的订单 bar 的位置, 不区分购买还是出售订单
             self.bar_executed = len(self)
 
-        elif order.status in [order.Canceled, order.Rejected, order.Margin]:
-            # 订单 取消, 拒绝, 或保证金订单?
-            self.log('Order %s', order.status)
+        elif order.status in [order.Canceled]:
+            # 订单 用户取消, 保证金
+            self.log('Order %s', order.Canceled.__str__)
+
+        elif order.status in [order.Rejected]:
+            # 订单 经纪人拒绝订单
+            self.log('Order %s', order.Rejected.__str__)
+            
+        elif order.status in [order.Margin]:
+            # 订单 保证金不足（现金不足）
+            self.log('Order %s', order.Margin.__str__)
         
         self.order=None
 
