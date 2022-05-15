@@ -1,9 +1,7 @@
-
-from .runtime import CurrentWorkPath as cw
-cw.AddProjectFolderToWorkPath()
-
-import backtrader
+import imp
 import pandas
+import backtrader
+
 
 class TestStrategyDefault(backtrader.Strategy):
 

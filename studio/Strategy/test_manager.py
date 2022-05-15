@@ -1,15 +1,12 @@
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
-from .runtime import CurrentWorkPath as cw
-cw.AddProjectFolderToWorkPath()
-
-import backtrader
-import pandas
-from datetime import datetime
-
-from .strategy_manager import TestStrategyManager
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 from .default_strategy import TestStrategyDefault
+from .strategy_manager import TestStrategyManager
+from datetime import datetime
+import pandas
+import backtrader
+
 
 class TestManager():
 
