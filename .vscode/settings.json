@@ -1,0 +1,19 @@
+{
+    "python.languageServer": "Pylance",
+    "editor.formatOnSave": true,
+    "python.autoComplete.addBrackets": true,
+    "python.autoComplete.extraPaths": [
+        "./backtrader",
+        "./backtrader/backtrader"
+    ],
+    "python.analysis.extraPaths": [
+        "./backtrader",
+        "./backtrader/backtrader"
+    ],
+    "python.jediEnable": false,
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.analysis.completeFunctionParens": true,
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceRoot}"
+    }
+}

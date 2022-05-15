@@ -13,7 +13,8 @@
             "justMyCode": false,
             "evn": {
                 "PYTHONPATH": "${workspaceRoot}"
-            }
+            },
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "name": "Python: SimpleTest",
@@ -24,7 +25,8 @@
             "justMyCode": false,
             "evn": {
                 "PYTHONPATH": "${workspaceRoot}"
-            }
+            },
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
