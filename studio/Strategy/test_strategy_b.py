@@ -4,6 +4,11 @@ from .default_strategy import TestStrategyDefault
 
 class TestStrategyPlanB(TestStrategyDefault):
 
+    # 外部传参
+    params = (
+        ("exitbars", 5),
+    )
+
     def __init__(self):
         # 引用到 输入数据的close价格
         TestStrategyDefault.__init__(self)
@@ -85,8 +90,8 @@ class TestStrategyPlanB(TestStrategyDefault):
         else:
 
             # len(self) 记录最后一次执行bar的位置, 每次next会加1, bar_executed记录上次进行交易完成的 bar 位置
-            # 距离上次交易 过去了5个 bar 时间单位(在这里一个bar是一天), 就直接执行出售
-            if len(self) >= self.bar_executed+5:
+            # 距离上次交易 过去了exitbars个 bar 时间单位(在这里一个bar是一天), 就直接执行出售
+            if len(self) >= self.bar_executed+self.params.exitbars:
                 self.log('TestStrategyPlanB sell create: %.2f' %
                          self.dataclose[0])
                 self.order = self.sell()

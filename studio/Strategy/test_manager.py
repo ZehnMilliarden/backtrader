@@ -18,6 +18,12 @@ class TestManager():
 
     __commission = 0.0005
 
+    __stake_size = 100
+
+    def set_stake_size(self, stake_size):
+        self.__stake_size = stake_size
+        return True
+
     def set_strategy_name(self, strategy_name):
         self.__strategy_name = strategy_name
         return True
@@ -37,7 +43,8 @@ class TestManager():
         strategyManager.SetStrategy(self.__strategy_name)
 
         # 添加策略
-        cerebro.addstrategy(strategyManager.GetStrategy())
+        cerebro.addstrategy(strategyManager.GetStrategy(),
+                            exitbars=7)
 
         stock_data_raw = pandas.read_csv(
             self.__data_path, index_col='Date', parse_dates=True)
@@ -58,9 +65,15 @@ class TestManager():
         # 佣金设置
         cerebro.broker.setcommission(self.__commission)
 
+        # 设置股票数量(每手)
+        cerebro.addsizer(backtrader.sizers.FixedSize, stake=self.__stake_size)
+
         print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
         cerebro.run()
         print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+
+        # 可视化画图, 有引入问题, 暂时屏蔽
+        # cerebro.plot()
 
         return True
 # if __name__ == '__main__':
