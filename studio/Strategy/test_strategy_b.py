@@ -1,4 +1,6 @@
 
+from pandas import Period
+import backtrader
 from .default_strategy import TestStrategyDefault
 
 
@@ -7,6 +9,7 @@ class TestStrategyPlanB(TestStrategyDefault):
     # 外部传参
     params = (
         ("exitbars", 5),
+        ("maperiod", 20)
     )
 
     def __init__(self):
@@ -17,6 +20,7 @@ class TestStrategyPlanB(TestStrategyDefault):
         self.order = None
 
     # 订单状态变更
+
     def notify_order(self, order):
 
         if self.order is None:

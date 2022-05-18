@@ -43,8 +43,11 @@ class TestManager():
         strategyManager.SetStrategy(self.__strategy_name)
 
         # 添加策略
-        cerebro.addstrategy(strategyManager.GetStrategy(),
-                            exitbars=7)
+        # cerebro.addstrategy(strategyManager.GetStrategy(),
+        #                     exitbars=7)
+
+        cerebro.optstrategy(strategyManager.GetStrategy(),
+                            maperiod=(15, 25))
 
         stock_data_raw = pandas.read_csv(
             self.__data_path, index_col='Date', parse_dates=True)
