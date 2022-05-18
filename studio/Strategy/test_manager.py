@@ -47,7 +47,7 @@ class TestManager():
         #                     exitbars=7)
 
         cerebro.optstrategy(strategyManager.GetStrategy(),
-                            maperiod=(15, 25))
+                            maperiod=range(15, 25))
 
         stock_data_raw = pandas.read_csv(
             self.__data_path, index_col='Date', parse_dates=True)
