@@ -24,8 +24,8 @@ class TestStrategyPlanA(TestStrategyDefault):
             self.datas[0], period=self.params.maperiod)
 
         # 移动均线
-        # self.sma = backtrader.indicators.SMA(
-        #     self.datas[0], period=self.params.maperiod)
+        self.sma = backtrader.indicators.SMA(
+            self.datas[0], period=self.params.maperiod)
 
     # 订单状态变更
 
@@ -48,21 +48,24 @@ class TestStrategyPlanA(TestStrategyDefault):
                 # order.executed.value 订单价值
                 # order.executed.comm  订单佣金
 
-                self.log('TestStrategyPlanA buy execute Size:%d Price: %.2f, Cost: %.2f, Comm: %.2f' %
+                self.log('TestStrategyPlanA buy execute Size:%d Price: %.2f, Cost: %.2f, Comm: %.2f, period: %d' %
                          (order.executed.size,
                           order.executed.price,
                           order.executed.value,
-                          order.executed.comm))
+                          order.executed.comm,
+                          self.params.maperiod))
 
             elif order.issell():
 
                 # 同上
 
-                self.log('TestStrategyPlanA sell execute Size:%d Price: %.2f, Cost: %.2f, Comm: %.2f' %
+                self.log('TestStrategyPlanA sell execute Size:%d Price: %.2f, Cost: %.2f, Comm: %.2f, period: %d' %
                          (order.executed.size,
                           order.executed.price,
                           order.executed.value,
-                          order.executed.comm))
+                          order.executed.comm,
+                          self.params.maperiod))
+
             else:
                 self.log('TestStrategyPlanA unrecorgnized order: %s' %
                          order.status)
@@ -107,6 +110,12 @@ class TestStrategyPlanA(TestStrategyDefault):
                 self.log('TestStrategyPlanA sell create: %.2f, sma[0]:%.2f' %
                          (self.dataclose[0], self.sma[0]))
                 self.order = self.sell()
+
+    # 这里有个崩溃问题
+    # def stop(self):
+    #     dt2 = dt2 or self.datas[0].datetime.date(0)
+    #     print('%s : End (SMA period %d) Portfolio Value: %.2f' %
+    #           (dt2.isoformat(), self.params.maperiod, self.value))
 
 # if __name__ == '__main__':
 #     print(TestStrategyPlanA.__name__ + ' version:'+TestStrategyPlanA.__version__)
