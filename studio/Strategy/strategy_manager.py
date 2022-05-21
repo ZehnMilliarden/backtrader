@@ -1,7 +1,9 @@
 
+from studio.Strategy.test_strategy_c import TestStrategyPlanC
 from .default_strategy import TestStrategyDefault
 from .test_strategy_a import TestStrategyPlanA
 from .test_strategy_b import TestStrategyPlanB
+
 
 class TestStrategyManager:
 
@@ -11,7 +13,7 @@ class TestStrategyManager:
         self.__StrategyType = TestStrategyDefault.__name__
 
     def SetStrategy(self, StrategyType):
-        self.__StrategyType=StrategyType
+        self.__StrategyType = StrategyType
 
     def GetStrategy(self):
         if self.__StrategyType == TestStrategyDefault.__name__:
@@ -20,6 +22,8 @@ class TestStrategyManager:
             return TestStrategyPlanA
         elif self.__StrategyType == TestStrategyPlanB.__name__:
             return TestStrategyPlanB
+        elif self.__StrategyType == TestStrategyPlanC.__name__:
+            return TestStrategyPlanC
         return TestStrategyDefault
 
 # if __name__ == '__main__':
