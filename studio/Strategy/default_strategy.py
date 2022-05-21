@@ -7,8 +7,13 @@ class TestStrategyDefault(backtrader.Strategy):
 
     __version__ = '1.0'
 
+    __need_log = False
+
     def log(self, txt, dt=None):
         ''' 提供记录功能 '''
+        if (self.__need_log == False):
+            return
+
         dt = dt or self.datas[0].datetime.date(0)
         print('%s, %s' % (dt.isoformat(), txt))
 
@@ -20,5 +25,8 @@ class TestStrategyDefault(backtrader.Strategy):
     def next(self):
         self.log('TestStrategyDefault Close, %.2f' % self.dataclose[0])
 
-# if __name__ == '__main__':
-#     print( TestStrategyDefault.__name__ + ' version:' + TestStrategyDefault.__version__)
+    def set_need_log(self, need_log):
+        self.__need_log == need_log
+
+        # if __name__ == '__main__':
+        #     print( TestStrategyDefault.__name__ + ' version:' + TestStrategyDefault.__version__)
