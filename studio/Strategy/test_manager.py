@@ -43,7 +43,7 @@ class TestManager():
         strategyManager.SetStrategy(self.__strategy_name)
 
         # 添加策略
-        cerebro.addstrategy(strategyManager.GetStrategy())
+        cerebro.addstrategy(strategyManager.GetStrategy(), exit_bar=90)
 
         # cerebro.optstrategy(strategyManager.GetStrategy(),
         #                     maperiod=range(15, 25))
