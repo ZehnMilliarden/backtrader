@@ -60,31 +60,46 @@ class Cerebro(with_metaclass(MetaParams, object)):
         Whether to preload the different ``data feeds`` passed to cerebro for
         the Strategies
 
+        是否预加载不同的回测数据传递给策略
+
       - ``runonce`` (default: ``True``)
 
         Run ``Indicators`` in vectorized mode to speed up the entire system.
         Strategies and Observers will always be run on an event based basis
 
+        通过矢量模式运行 指示(Indicators) 加速整个系统, 策略和观察者始终基于基础事件运行
+
       - ``live`` (default: ``False``)
 
-        If no data has reported itself as *live* (via the data's ``islive``
+        If no data has reported itself as *live* (via the data's ``islive``)
         method but the end user still want to run in ``live`` mode, this
-        parameter can be set to true
+        parameter can be set to true)
+
+        如果没有数据申明他自己是live ( 通过数据的 islive 方法判断是否是live ) 但是如果用户
+        任然系统运行在live模式下 , 此参数可以设置为 true )
 
         This will simultaneously deactivate ``preload`` and ``runonce``. It
         will have no effect on memory saving schemes.
 
+        该设置会 同时 取消 preload 和 runonce 参数, 该设置对内存节省方案没有影响
+
         Run ``Indicators`` in vectorized mode to speed up the entire system.
         Strategies and Observers will always be run on an event based basis
 
+        通过矢量模式运行 指示(Indicators) 加速整个系统, 策略和观察者始终基于基础事件运行
+
       - ``maxcpus`` (default: None -> all available cores)
 
-         How many cores to use simultaneously for optimization
+        How many cores to use simultaneously for optimization
+
+        可以选择多少CPU核心会同时使用
 
       - ``stdstats`` (default: ``True``)
 
         If True default Observers will be added: Broker (Cash and Value),
         Trades and BuySell
+
+        如果该参数设置为True, Broker, Trades, BuySell 观察者会被添加
 
       - ``oldbuysell`` (default: ``False``)
 
@@ -1325,7 +1340,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
                         if attrname.startswith('data'):
                             setattr(a, attrname, None)
 
-                oreturn = OptReturn(strat.params, analyzers=strat.analyzers, strategycls=type(strat))
+                oreturn = OptReturn(
+                    strat.params, analyzers=strat.analyzers, strategycls=type(strat))
                 results.append(oreturn)
 
             return results

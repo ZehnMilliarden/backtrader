@@ -241,6 +241,8 @@ class BackBroker(bt.BrokerBase):
         ('fundmode', False),
     )
 
+    cerebro: bt.Cerebro
+
     def __init__(self):
         super(BackBroker, self).__init__()
         self._userhist = []
