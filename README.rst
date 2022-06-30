@@ -24,7 +24,8 @@ backtrader - 持续优化开发
    :target: https://pypi.python.org/pypi/backtrader/
 
 ** 捐赠 **:
-.. image:: https://github.com/ZehnMilliarden/backtrader/blob/2059fb993b60efe87977f7a8160eac04f5dc48f7/images/donate.jpg
+.. figure:: https://github.com/ZehnMilliarden/backtrader/blob/2059fb993b60efe87977f7a8160eac04f5dc48f7/images/donate.jpg
+   :alt: image
 
 **Yahoo API Note**:
 
