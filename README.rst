@@ -1,4 +1,4 @@
-backtrader - æŒç»­ä¼˜åŒ–å¼€å‘
+backtrader - ³ÖĞøÓÅ»¯¿ª·¢
 ==========
 .. image:: https://img.shields.io/pypi/v/backtrader.svg
    :alt: PyPi Version
@@ -24,7 +24,7 @@ backtrader - æŒç»­ä¼˜åŒ–å¼€å‘
    :target: https://pypi.python.org/pypi/backtrader/
 
 
-**æèµ **:
+**¾èÔù**:
 
 .. figure:: https://github.com/ZehnMilliarden/backtrader/blob/2059fb993b60efe87977f7a8160eac04f5dc48f7/images/donate.jpg
    :alt: image
