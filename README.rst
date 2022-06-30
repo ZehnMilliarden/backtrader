@@ -1,4 +1,4 @@
-image::https://github.com/ZehnMilliarden/backtrader/blob/2059fb993b60efe87977f7a8160eac04f5dc48f7/images/donate.jpg
+.. image::https://github.com/ZehnMilliarden/backtrader/blob/2059fb993b60efe87977f7a8160eac04f5dc48f7/images/donate.jpg
 
 backtrader
 ==========
