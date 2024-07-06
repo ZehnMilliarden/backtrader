@@ -7,10 +7,10 @@ from .default_strategy import TestStrategyDefault
 class TestStrategyPlanA(TestStrategyDefault):
 
     # 外部传参
-    params = (
-        ("exitbars", 5),
-        ("maperiod", 20)
-    )
+    params = {
+        "exit_bar": 5,
+        "maperiod": 20
+    }
 
     def __init__(self):
         # 引用到 输入数据的close价格
@@ -26,6 +26,9 @@ class TestStrategyPlanA(TestStrategyDefault):
         # 移动均线
         self.sma = backtrader.indicators.SMA(
             self.datas[0], period=self.params.maperiod)
+        
+        # 记录当前的价值
+        self.value = 0
 
     # 订单状态变更
 
@@ -111,11 +114,14 @@ class TestStrategyPlanA(TestStrategyDefault):
                          (self.dataclose[0], self.sma[0]))
                 self.order = self.sell()
 
-    # 这里有个崩溃问题
-    # def stop(self):
-    #     dt2 = dt2 or self.datas[0].datetime.date(0)
-    #     print('%s : End (SMA period %d) Portfolio Value: %.2f' %
-    #           (dt2.isoformat(), self.params.maperiod, self.value))
+        # 获取当前的总价值
+        self.value = self.broker.getvalue()
+        
+    def stop(self):
+        dt2 = None
+        dt2 = dt2 or self.datas[0].datetime.date(0)
+        print('%s : End (SMA period %d) Portfolio Value: %.2f' %
+              (dt2.isoformat(), self.params.maperiod, self.value))
 
 # if __name__ == '__main__':
 #     print(TestStrategyPlanA.__name__ + ' version:'+TestStrategyPlanA.__version__)

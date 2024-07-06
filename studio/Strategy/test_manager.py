@@ -75,7 +75,7 @@ class TestManager():
         print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
         # 可视化画图, 有引入问题, 暂时屏蔽
-        # cerebro.plot()
+        cerebro.plot()
 
         return True
 # if __name__ == '__main__':
