@@ -18,6 +18,12 @@ class TestStrategyConfigImpl(strategy_config.StrategyConfigBase):
         self.__is_plot__ = is_plot
 
     def get_stock_data(self) -> backtrader.feeds.PandasData:
+
+        # 数据格式
+        # datafields = [
+        #   'datetime', 'open', 'high', 'low', 'close', 'volume', 'openinterest'
+        # ]
+
         stock_data_raw = pandas.read_csv(
             self.get_data_path(), index_col='Date', parse_dates=True)
 
