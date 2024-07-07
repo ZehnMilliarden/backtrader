@@ -1,8 +1,7 @@
-
-from studio.Strategy.test_strategy_c import TestStrategyPlanC
-from .default_strategy import TestStrategyDefault
-from .test_strategy_a import TestStrategyPlanA
-from .test_strategy_b import TestStrategyPlanB
+from studio.Strategy.default_strategy import TestStrategyDefault
+from studio.Strategy.demo.test_strategy_c import TestStrategyPlanC
+from studio.Strategy.demo.test_strategy_a import TestStrategyPlanA
+from studio.Strategy.demo.test_strategy_b import TestStrategyPlanB
 
 
 class TestStrategyManager:

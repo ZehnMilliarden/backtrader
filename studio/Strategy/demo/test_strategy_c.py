@@ -2,8 +2,9 @@
 from pandas import Period
 import backtrader
 from backtrader.indicators import sma
-from .default_strategy import TestStrategyDefault
-
+from Strategy.default_strategy import TestStrategyDefault
+from Strategy.strategy_config import StrategyConfigBase
+from Strategy.demo.test_strategy_config import TestStrategyConfigImpl
 
 class TestStrategyPlanC(TestStrategyDefault):
 

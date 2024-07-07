@@ -1,16 +1,17 @@
 
 from pandas import Period
 import backtrader
-from .default_strategy import TestStrategyDefault
-
+from Strategy.default_strategy import TestStrategyDefault
+from Strategy.strategy_config import StrategyConfigBase
+from Strategy.demo.test_strategy_config import TestStrategyConfigImpl
 
 class TestStrategyPlanB(TestStrategyDefault):
 
     # 外部传参
-    params = (
-        ("exitbars", 5),
-        ("maperiod", 20)
-    )
+    params = {
+        "exit_bar" : 5,
+        "maperiod": 20
+    }
 
     def __init__(self):
         # 引用到 输入数据的close价格

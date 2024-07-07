@@ -1,7 +1,10 @@
 import imp
 import pandas
 import backtrader
-
+from datetime import datetime
+from typing import overload
+from Strategy.strategy_config import StrategyConfigBase
+from Strategy.demo.test_strategy_config import TestStrategyConfigImpl
 
 class TestStrategyDefault(backtrader.Strategy):
 
@@ -22,11 +25,13 @@ class TestStrategyDefault(backtrader.Strategy):
         self.log('TestStrategyDefault __init__')
         self.dataclose = self.datas[0].close
 
-    def next(self):
-        self.log('TestStrategyDefault Close, %.2f' % self.dataclose[0])
-
     def set_need_log(self, need_log):
         self.__need_log == need_log
 
-        # if __name__ == '__main__':
-        #     print( TestStrategyDefault.__name__ + ' version:' + TestStrategyDefault.__version__)
+    def get_strategy_config() -> StrategyConfigBase:
+        cfg = TestStrategyConfigImpl()
+        return cfg
+
+
+# if __name__ == '__main__':
+#     print( TestStrategyDefault.__name__ + ' version:' + TestStrategyDefault.__version__)
