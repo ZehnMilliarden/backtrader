@@ -6,15 +6,14 @@ from .strategy_manager import TestStrategyManager
 from datetime import datetime
 import pandas
 import backtrader
-
+from Strategy.strategy_config import StrategyConfigBase
+from Strategy.demo.test_strategy_config import TestStrategyConfigImpl
 
 class TestManager():
 
     __version__ = '1.0'
 
     __strategy_name = TestStrategyDefault.__name__
-
-    __data_path = 'datas\yhoo-2014.txt'
 
     __commission = 0.0005
 
@@ -28,10 +27,6 @@ class TestManager():
         self.__strategy_name = strategy_name
         return True
 
-    def set_data_path(self, data_name):
-        self.__data_path = data_name
-        return True
-
     def set_commission(self, commission):
         self.__commission = commission
         return True
@@ -42,24 +37,18 @@ class TestManager():
         strategyManager = TestStrategyManager()
         strategyManager.SetStrategy(self.__strategy_name)
 
+        test_stategy = strategyManager.GetStrategy()
+
         # 添加策略
-        cerebro.addstrategy(strategyManager.GetStrategy(), exit_bar=90)
+        cerebro.addstrategy(test_stategy, exit_bar=90)
 
         # cerebro.optstrategy(strategyManager.GetStrategy(),
         #                     maperiod=range(15, 25))
-
-        stock_data_raw = pandas.read_csv(
-            self.__data_path, index_col='Date', parse_dates=True)
-        # print(stock_data_raw)
-
-        start_date = datetime(2014, 1, 2)
-        end_date = datetime(2014, 12, 31)
-
-        stock_data = backtrader.feeds.PandasData(
-            dataname=stock_data_raw, fromdate=start_date, todate=end_date)
+    
+        strategy_config = test_stategy.get_strategy_config()
 
         # 添加测试数据
-        cerebro.adddata(stock_data)
+        cerebro.adddata(strategy_config.get_stock_data())
 
         # 本金设置
         cerebro.broker.setcash(100000.0)
@@ -75,7 +64,8 @@ class TestManager():
         print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
         # 可视化画图, 有引入问题, 暂时屏蔽
-        cerebro.plot()
+        if strategy_config.is_plot() is True:
+            cerebro.plot()
 
         return True
 # if __name__ == '__main__':

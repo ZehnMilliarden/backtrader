@@ -1,8 +1,11 @@
 
 from pandas import Period
 import backtrader
-from .default_strategy import TestStrategyDefault
-
+from Strategy.default_strategy import TestStrategyDefault
+from datetime import datetime
+import pandas
+from Strategy.strategy_config import StrategyConfigBase
+from Strategy.demo.test_strategy_config import TestStrategyConfigImpl
 
 class TestStrategyPlanA(TestStrategyDefault):
 
@@ -13,10 +16,9 @@ class TestStrategyPlanA(TestStrategyDefault):
     }
 
     def __init__(self):
-        # 引用到 输入数据的close价格
-        TestStrategyDefault.__init__(self)
+        # order 用于标记 当前正在处理的订单\
+        super(TestStrategyPlanA, self).__init__()
 
-        # order 用于标记 当前正在处理的订单
         self.order = None
 
         # 移动均线
@@ -26,12 +28,11 @@ class TestStrategyPlanA(TestStrategyDefault):
         # 移动均线
         self.sma = backtrader.indicators.SMA(
             self.datas[0], period=self.params.maperiod)
-        
+
         # 记录当前的价值
         self.value = 0
 
     # 订单状态变更
-
     def notify_order(self, order):
 
         if self.order is None:
@@ -91,7 +92,7 @@ class TestStrategyPlanA(TestStrategyDefault):
         self.order = None
 
     def next(self):
-        # self.log('TestStrategyPlanA Close, %.2f' % self.dataclose[0])
+        self.log('TestStrategyPlanA Close, %.2f' % self.dataclose[0])
 
         # 如果之前已经有订单在处理，但是还没处理完，就不再处理新订单 ( 这是当前策略处理的逻辑 )
         if self.order:
@@ -122,6 +123,11 @@ class TestStrategyPlanA(TestStrategyDefault):
         dt2 = dt2 or self.datas[0].datetime.date(0)
         print('%s : End (SMA period %d) Portfolio Value: %.2f' %
               (dt2.isoformat(), self.params.maperiod, self.value))
+
+    def get_strategy_config() -> StrategyConfigBase:
+        cfg = TestStrategyConfigImpl()
+        cfg.set_plot(True)
+        return cfg
 
 # if __name__ == '__main__':
 #     print(TestStrategyPlanA.__name__ + ' version:'+TestStrategyPlanA.__version__)
