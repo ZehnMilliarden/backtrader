@@ -4,13 +4,13 @@ import pandas
 from datetime import datetime
 
 
-class TestStrategyConfigImpl(strategy_config.StrategyConfigBase):
+class TdxStrategyConfigImpl(strategy_config.StrategyConfigBase):
 
     def __init__(self):
         self.__is_plot__ = False
         self.__start_date__ = datetime(2014, 1, 1)
         self.__end_date__ = datetime(2014, 12, 31)
-        self.__data_path__ = 'datas\yhoo-2014.txt'
+        self.__data_path__ = 'datas/TDXStock/tdx/day/sh000001.csv'
 
     def is_plot(self) -> bool:
         return self.__is_plot__
@@ -26,7 +26,7 @@ class TestStrategyConfigImpl(strategy_config.StrategyConfigBase):
         # ]
 
         stock_data_raw = pandas.read_csv(
-            self.get_data_path(), index_col='Date', parse_dates=True)
+            self.get_data_path(), index_col='date', parse_dates=True)
 
         start_date = self.get_start_date()
         end_date = self.get_end_date()
@@ -55,4 +55,4 @@ class TestStrategyConfigImpl(strategy_config.StrategyConfigBase):
         self.__data_path__ = data_path
 
     def get_exit_bar(self) -> int:
-        return 90
+        return 20 * 12 * 3
