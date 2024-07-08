@@ -9,6 +9,7 @@ import backtrader
 from Strategy.strategy_config import StrategyConfigBase
 from Strategy.demo.test_strategy_config import TestStrategyConfigImpl
 
+
 class TestManager():
 
     __version__ = '1.0'
@@ -38,14 +39,14 @@ class TestManager():
         strategyManager.SetStrategy(self.__strategy_name)
 
         test_stategy = strategyManager.GetStrategy()
+        strategy_config = test_stategy.get_strategy_config()
 
         # 添加策略
-        cerebro.addstrategy(test_stategy, exit_bar=90)
+        cerebro.addstrategy(
+            test_stategy, exit_bar=strategy_config.get_exit_bar())
 
         # cerebro.optstrategy(strategyManager.GetStrategy(),
         #                     maperiod=range(15, 25))
-    
-        strategy_config = test_stategy.get_strategy_config()
 
         # 添加测试数据
         cerebro.adddata(strategy_config.get_stock_data())
