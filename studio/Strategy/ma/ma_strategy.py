@@ -25,7 +25,7 @@ class MaStrategy(TestStrategyDefault):
         self.order = None
 
         self.sma = backtrader.indicators.SMA(
-            self.datas[0], period=28)
+            self.dataclose, period=28)
 
         # 记录当前的价值
         self.value = 0
@@ -99,12 +99,12 @@ class MaStrategy(TestStrategyDefault):
         # 手里是否有头寸, 如果没有头寸就处理只处理买逻辑, 如果有头寸就处理卖逻辑
         if not self.position:
 
-            if (self.dataclose[0] >= self.sma[0] and self.dataclose[-1] < self.sma[-1]):
+            if (self.dataclose[0] > self.sma[0]) and (self.dataclose[-1] <= self.sma[-1]):
+
                 self.log('MaStrategy buy create: %.2f, sma[0]:%.2f'
                          % (self.dataclose[0], self.sma[0]))
 
-                max_price_size = math.floor(
-                    self.broker.get_cash() / max(self.dataclose[0], self.dataclose[1]))
+                max_price_size = self.get_max_size()
 
                 self.log('BUY CREATE , %.4f, %.1f' %
                          (self.dataclose[0], max_price_size))
@@ -112,7 +112,7 @@ class MaStrategy(TestStrategyDefault):
                 self.order = self.buy(size=max_price_size)
 
         else:
-            if self.dataclose[0] < self.sma[0] and self.dataclose[-1] >= self.sma[-1]:
+            if self.dataclose[0] < self.sma[0]:
                 self.log('MaStrategy sell create: %.2f, sma[0]:%.2f' %
                          (self.dataclose[0], self.sma[0]))
                 self.order = self.sell(size=self.position.size)

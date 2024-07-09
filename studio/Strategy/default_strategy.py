@@ -5,6 +5,8 @@ from datetime import datetime
 from typing import overload
 from Strategy.strategy_config import StrategyConfigBase
 from Strategy.demo.test_strategy_config import TestStrategyConfigImpl
+import math
+
 
 class TestStrategyDefault(backtrader.Strategy):
 
@@ -31,6 +33,10 @@ class TestStrategyDefault(backtrader.Strategy):
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TestStrategyConfigImpl()
         return cfg
+
+    def get_max_size(self):
+        return math.floor(
+            self.broker.get_cash() / 100 / self.dataclose[0]) * 100
 
 
 # if __name__ == '__main__':
