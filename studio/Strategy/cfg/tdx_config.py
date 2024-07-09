@@ -28,6 +28,8 @@ class TdxStrategyConfigImpl(strategy_config.StrategyConfigBase):
         stock_data_raw = pandas.read_csv(
             self.get_data_path(), index_col='date', parse_dates=True)
 
+        stock_data_raw['volume'] = stock_data_raw['volume'] * 100
+
         start_date = self.get_start_date()
         end_date = self.get_end_date()
 
