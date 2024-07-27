@@ -44,6 +44,7 @@ class TestManager():
         # 添加策略
         cerebro.addstrategy(
             test_stategy, exit_bar=strategy_config.get_exit_bar())
+        #cerebro.optstrategy(test_stategy, maperiod=range(15, 50))
 
         # cerebro.optstrategy(strategyManager.GetStrategy(),
         #                     maperiod=range(15, 25))
@@ -66,7 +67,8 @@ class TestManager():
 
         # 可视化画图, 有引入问题, 暂时屏蔽
         if strategy_config.is_plot() is True:
-            cerebro.plot()
+            cerebro.plot(style='candle',
+                         barup='red', bardown='green')
 
         return True
 # if __name__ == '__main__':
