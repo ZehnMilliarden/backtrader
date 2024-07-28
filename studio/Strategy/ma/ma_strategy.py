@@ -8,14 +8,22 @@ from Strategy.strategy_config import StrategyConfigBase
 from Strategy.cfg.tdx_config import TdxStrategyConfigImpl
 import math
 from dateutil.relativedelta import relativedelta
+import enum
 
+MaStrategyEnum = enum.Enum('MaStrategyEnum', ('SMA', 'MMA', 'EMA', 'MEMA'))
 
 class MaStrategy(TestStrategyDefault):
 
     # 外部传参
     params = {
         "exit_bar": 5,
-        "maperiod": 20
+        "maperiod": 20,
+        "sma_slow": 20,
+        "sma_fast": 10,
+        "ema_day": 20,
+        "ema_slow": 50,
+        "ema_fast": 10,
+        "ma_strategy_enum": MaStrategyEnum.MMA
     }
 
     def __init__(self):
@@ -24,8 +32,19 @@ class MaStrategy(TestStrategyDefault):
 
         self.order = None
 
-        self.sma = backtrader.indicators.SMA(
-            self.dataclose, period=28)
+        if self.params.ma_strategy_enum == MaStrategyEnum.SMA:
+            self.sma = backtrader.indicators.SMA(
+                self.dataclose, period=self.params.maperiod)
+        elif self.params.ma_strategy_enum == MaStrategyEnum.MMA:
+            self.sma_fast = backtrader.indicators.SMA(period=self.params.sma_fast)
+            self.sma_slow = backtrader.indicators.SMA(period=self.params.sma_slow)
+            self.sma_cross = backtrader.indicators.CrossOver(self.sma_fast, self.sma_slow)
+        elif self.params.ma_strategy_enum == MaStrategyEnum.EMA:
+            self.ema = backtrader.indicators.EMA(self.dataclose, period=self.params.ema_day)
+        else:
+            self.ema_fast = backtrader.indicators.SMA(period=self.params.ema_fast)
+            self.ema_slow = backtrader.indicators.SMA(period=self.params.ema_slow)
+            self.ema_cross = backtrader.indicators.CrossOver(self.ema_fast, self.ema_slow)
 
         # 记录当前的价值
         self.value = 0
@@ -84,11 +103,32 @@ class MaStrategy(TestStrategyDefault):
             self.log('Order %s', order.Rejected.__str__)
 
         elif order.status in [order.Margin]:
-            # 订单 保证金不足（现金不足）
+            # 订单 保证金不足（现金不足）如果次日股票高开高走，价格都超过本日收盘价，你的现金就买不起这么多的股票，出现Margin状态
+            dt = self.data.datetime.date(0).strftime("%Y-%m-%d")
             self.log('Order %s', order.Margin.__str__)
 
         self.order = None
 
+    def can_buy(self):
+        if self.params.ma_strategy_enum == MaStrategyEnum.SMA:
+            return (self.dataclose[0] > self.sma[0]) and (self.dataclose[-1] <= self.sma[-1])
+        elif self.params.ma_strategy_enum == MaStrategyEnum.MMA:
+            return self.sma_cross > 0
+        elif self.params.ma_strategy_enum == MaStrategyEnum.EMA:
+            return self.dataclose[0] > self.ema[0]
+        else:
+            return self.ema_cross > 0
+        
+    def can_sell(self):
+        if self.params.ma_strategy_enum == MaStrategyEnum.SMA:
+            return self.dataclose[0] < self.sma[0]
+        elif self.params.ma_strategy_enum == MaStrategyEnum.MMA:
+            return self.sma_cross < 0
+        elif self.params.ma_strategy_enum == MaStrategyEnum.EMA:
+            return self.dataclose[0] < self.ema[0]
+        else:
+            return self.ema_cross < 0
+        
     def next(self):
         self.log('MaStrategy Close, %.2f' % self.dataclose[0])
 
@@ -97,24 +137,24 @@ class MaStrategy(TestStrategyDefault):
             return
 
         # 手里是否有头寸, 如果没有头寸就处理只处理买逻辑, 如果有头寸就处理卖逻辑
+        dt = self.data.datetime.date(0).strftime("%Y-%m-%d")
         if not self.position:
-
-            if (self.dataclose[0] > self.sma[0]) and (self.dataclose[-1] <= self.sma[-1]):
-
-                self.log('MaStrategy buy create: %.2f, sma[0]:%.2f'
-                         % (self.dataclose[0], self.sma[0]))
-
+            if self.can_buy():
                 max_price_size = self.get_max_size()
+                rise = (self.dataclose[0] - self.dataclose[-1]) / self.dataclose[0]
+                print(rise)
+                if rise > 0.9:
+                    price = self.dataclose[0] * (1 + 0.05)
+                    max_price_size = math.floor(self.broker.get_cash() / 100 / price) * 100
+                print('%s : buy price: %.2f size: %d' % (dt, self.dataclose[0], max_price_size))
 
                 self.log('BUY CREATE , %.4f, %.1f' %
                          (self.dataclose[0], max_price_size))
 
                 self.order = self.buy(size=max_price_size)
-
         else:
-            if self.dataclose[0] < self.sma[0]:
-                self.log('MaStrategy sell create: %.2f, sma[0]:%.2f' %
-                         (self.dataclose[0], self.sma[0]))
+            if self.can_sell():
+                print('%s : sell price: %.2f size: %d' % (dt, self.dataclose[0], self.position.size))
                 self.order = self.sell(size=self.position.size)
 
         # 获取当前的总价值
@@ -129,7 +169,7 @@ class MaStrategy(TestStrategyDefault):
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
         cfg.set_plot(True)
-        cfg.set_data_path('datas/TDXStock/tdx/day/sh600025.csv')
+        cfg.set_data_path('E:/projects/pystock/pystock/tdx/data/tdx/day/sh600026.csv')
         cfg.set_start_date(datetime.now() - relativedelta(years=3))
         cfg.set_end_date(datetime.now())
         return cfg
