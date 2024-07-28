@@ -96,25 +96,36 @@ class MaStrategy(TestStrategyDefault):
         if self.order:
             return
 
+        try:
+            current_data_close = self.dataclose[0]
+            current_sma = self.sma[0]
+            pre_data_close = self.dataclose[-1]
+            pre_sma = self.sma[-1]
+            next_data_open = self.dataopen[1]
+        except:
+            return
+
         # 手里是否有头寸, 如果没有头寸就处理只处理买逻辑, 如果有头寸就处理卖逻辑
         if not self.position:
 
-            if (self.dataclose[0] > self.sma[0]) and (self.dataclose[-1] <= self.sma[-1]):
+            if (current_data_close > current_sma) and (pre_data_close <= pre_sma):
 
                 self.log('MaStrategy buy create: %.2f, sma[0]:%.2f'
-                         % (self.dataclose[0], self.sma[0]))
+                         % (current_data_close, current_sma))
 
-                max_price_size = self.get_max_size()
+                buyvalue = max(current_data_close, next_data_open)
+
+                max_price_size = self.get_max_size(buyvalue)
 
                 self.log('BUY CREATE , %.4f, %.1f' %
-                         (self.dataclose[0], max_price_size))
+                         (buyvalue, max_price_size))
 
                 self.order = self.buy(size=max_price_size)
 
         else:
-            if self.dataclose[0] < self.sma[0]:
+            if current_data_close < current_sma:
                 self.log('MaStrategy sell create: %.2f, sma[0]:%.2f' %
-                         (self.dataclose[0], self.sma[0]))
+                         (current_data_close, current_sma))
                 self.order = self.sell(size=self.position.size)
 
         # 获取当前的总价值
