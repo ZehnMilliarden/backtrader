@@ -26,7 +26,6 @@ class TestStrategyDefault(backtrader.Strategy):
         # 引用到 输入数据的close价格
         self.log('TestStrategyDefault __init__')
         self.dataclose = self.datas[0].close
-        self.dataopen = self.datas[0].open
 
     def set_need_log(self, need_log):
         self.__need_log == need_log
@@ -35,9 +34,9 @@ class TestStrategyDefault(backtrader.Strategy):
         cfg = TestStrategyConfigImpl()
         return cfg
 
-    def get_max_size(self, val):
+    def get_max_size(self):
         return math.floor(
-            self.broker.get_cash() / 100 / val) * 100
+            self.broker.get_cash() / 100 / self.dataclose[0]) * 100
 
 
 # if __name__ == '__main__':
