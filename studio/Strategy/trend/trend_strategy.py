@@ -18,6 +18,7 @@ class TrendStrategy(TestStrategyDefault):
 
     def __init__(self):
         super(TrendStrategy, self).__init__()
+        self.trend = backtrader.indicators.Trend(self.dataclose)
 
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
@@ -29,4 +30,10 @@ class TrendStrategy(TestStrategyDefault):
         return cfg
 
     def next(self):
+        pass
+
+    def notify_order(self, order):
+        pass
+
+    def stop(self):
         pass

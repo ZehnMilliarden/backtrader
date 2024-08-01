@@ -182,7 +182,7 @@ class MaStrategy(TestStrategyDefault):
         cfg = TdxStrategyConfigImpl()
         cfg.set_plot(True)
         cfg.set_data_path(
-            'E:/projects/pystock/pystock/tdx/data/tdx/day/sh600026.csv')
+            'datas/TDXStock/tdx/day/sh600026.csv')
         cfg.set_start_date(datetime.now() - relativedelta(years=3))
         cfg.set_end_date(datetime.now())
         return cfg
