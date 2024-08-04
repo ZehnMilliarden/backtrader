@@ -76,14 +76,14 @@ class Trend(Indicator):
         self._first_index = self._first_index - size
         return super().advance(size)
 
-    def _ConveHullImpl(self, potLine) -> list():
-        pass
-
-    def _ConvexHull(self):
-        self.trendLineSet = list()
-        for potLine in self.potLineSet:
-            trendLine = list()
-            self.trendLineSet.append(self._ConveHullImpl(trendLine))
+    def _ConvexHull(self, potLine, trendLine) -> list:
+        first_index: int = potLine[0]['index']
+        trendLine[first_index] = self.data.close[first_index]
+        for index,  pot in enumerate(potLine):
+            if 0 == index:
+                continue
+            trendLine[pot['index']] = trendLine[pot['index'] - 1]
+        return trendLine
 
     def _CaclLines(self, start, end) -> None:
         if self.trendHelp.cross[start] > 0:
@@ -93,6 +93,8 @@ class Trend(Indicator):
         else:
             return
 
-        currentLine[start] = self.data.close[start]
-        for index in range(start + 1, end):
-            currentLine[index] = currentLine[index-1]
+        potLine = list()
+        for index in range(start, end):
+            potLine.append(
+                {'index': index, 'high': self.data.high[index], 'low': self.data.low[index]})
+        self._ConvexHull(potLine, currentLine)
