@@ -18,7 +18,7 @@ class TrendStrategy(TestStrategyDefault):
 
     def __init__(self):
         super(TrendStrategy, self).__init__()
-        self.trend = backtrader.indicators.Trend(self.dataclose)
+        self.trend = backtrader.indicators.Trend(self.datas[0])
 
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
