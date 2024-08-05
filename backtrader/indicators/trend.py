@@ -76,13 +76,58 @@ class Trend(Indicator):
         self._first_index = self._first_index - size
         return super().advance(size)
 
-    def _ConvexHull(self, potLine, trendLine) -> list:
-        first_index: int = potLine[0]['index']
-        trendLine[first_index] = self.data.close[first_index]
+    def _directed_area(self, m):
+        return (m[2]['index'] - m[0]['index']) * (m[1]['val'] - m[0]['val']) - (m[1]['index'] - m[0]['index']) * (m[2]['val'] - m[0]['val'])
+
+    def _convex_hull(self,  point_list, direct):
+        '''
+        Input:  Given a point List: A List of Truple (x,y)
+        Output: Return a point list: A List of Truple (x,y) which is CONVEX HULL of input
+        For the sake of effeciency, There is no error check mechanism here. Please catch outside
+        '''
+        n = len(point_list)  # Total Length
+        # point_list.sort()
+
+        # Valid Check:
+        if n < 3:
+            return point_list
+
+        potSet = list()
+
+        # Building Upper Hull: Initialized with first two point
+        if direct:
+            potSet = point_list[0:1]
+            for i in range(2, n):
+                potSet.append(point_list[i])
+                while len(potSet) >= 3 and not self._directed_area(potSet[-3:]):
+                    del potSet[-2]
+        else:
+            # Building Lower Hull: Initialized with last two point
+            potSet = [point_list[-1], point_list[-2]]
+            for i in range(n - 3, -1, -1):  # From the i-3th to the first point
+                potSet.append(point_list[i])
+                while len(potSet) >= 3 and not self._directed_area(potSet[-3:]):
+                    del potSet[-2]
+            potSet.reverse()
+        return potSet
+
+    def _ConvexHull(self, potLine, trendLine, direct) -> list:
+        pots = list()
         for index,  pot in enumerate(potLine):
-            if 0 == index:
+            if direct:
+                pots.append(
+                    {'index': pot['index'], 'val': pot['low']})
+            else:
+                pots.append(
+                    {'index': pot['index'], 'val': pot['high']})
+        trendPots = self._convex_hull(pots, direct)
+        for index, pot in enumerate(trendPots):
+            if index == 0:
                 continue
-            trendLine[pot['index']] = trendLine[pot['index'] - 1]
+            prePot = trendPots[index-1]
+            k = (pot['val'] - prePot['val']) / (pot['index'] - prePot['val'])
+            for potIndex in range(prePot['index'], pot['index']):
+                trendLine[potIndex] = prePot['val'] + k
         return trendLine
 
     def _CaclLines(self, start, end) -> None:
@@ -97,4 +142,5 @@ class Trend(Indicator):
         for index in range(start, end):
             potLine.append(
                 {'index': index, 'high': self.data.high[index], 'low': self.data.low[index]})
-        self._ConvexHull(potLine, currentLine)
+        self._ConvexHull(potLine, currentLine,
+                         currentLine == self.lines.trend_0)
