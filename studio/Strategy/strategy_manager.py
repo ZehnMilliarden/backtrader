@@ -3,6 +3,7 @@ from studio.Strategy.demo.test_strategy_c import TestStrategyPlanC
 from studio.Strategy.demo.test_strategy_a import TestStrategyPlanA
 from studio.Strategy.demo.test_strategy_b import TestStrategyPlanB
 from studio.Strategy.ma.ma_strategy import MaStrategy
+from studio.Strategy.macd.macd_strategy import MacdStrategy
 
 
 class TestStrategyManager:
@@ -26,6 +27,8 @@ class TestStrategyManager:
             return TestStrategyPlanC
         elif self.__StrategyType == MaStrategy.__name__:
             return MaStrategy
+        elif self.__StrategyType == MacdStrategy.__name__:
+            return MacdStrategy
         return TestStrategyDefault
 
 # if __name__ == '__main__':
