@@ -44,7 +44,7 @@ class TestStrategyDefault(backtrader.Strategy):
 
     def get_next_open(self) -> float:
         try:
-            return self.datasopen[1]
+            return self.dataopen[1]
         except:
             return 0.0
         # if __name__ == '__main__':

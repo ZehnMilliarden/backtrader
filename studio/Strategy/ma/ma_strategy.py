@@ -19,7 +19,7 @@ class MaStrategy(TestStrategyDefault):
     params = {
         "exit_bar": 5,
         "maperiod": 20,
-        "sma_slow": 20,
+        "sma_slow": 30,
         "sma_fast": 10,
         "ema_day": 20,
         "ema_slow": 50,
@@ -148,26 +148,32 @@ class MaStrategy(TestStrategyDefault):
         dt = self.data.datetime.date(0).strftime("%Y-%m-%d")
         if not self.position:
             if self.can_buy():
-                max_price_size = self.get_max_size(self.dataclose[0])
+                open_price = self.get_next_open()
+                # max_price_size = self.get_max_size(open_price or self.dataclose[0])
+                if open_price == 0.0:
+                    return
+                max_price_size = self.get_max_size(open_price)
+
                 rise = (self.dataclose[0] -
                         self.dataclose[-1]) / self.dataclose[0]
                 print(rise)
-                if rise > 0.9:
-                    price = self.dataclose[0] * (1 + 0.05)
-                    max_price_size = math.floor(
-                        self.broker.get_cash() / 100 / price) * 100
+                # if rise > 0.9:
+                #     price = self.dataclose[0] * (1 + 0.05)
+                #     max_price_size = math.floor(
+                #         self.broker.get_cash() / 100 / price) * 100
                 print('%s : buy price: %.2f size: %d' %
                       (dt, self.dataclose[0], max_price_size))
 
                 self.log('BUY CREATE , %.4f, %.1f' %
                          (self.dataclose[0], max_price_size))
 
-                self.order = self.buy(size=max_price_size)
+                self.order = self.buy(price=open_price, size=max_price_size)
         else:
             if self.can_sell():
                 print('%s : sell price: %.2f size: %d' %
                       (dt, self.dataclose[0], self.position.size))
-                self.order = self.sell(size=self.position.size)
+                open_price = self.get_next_open()
+                self.order = self.sell(price=open_price, size=self.position.size)
 
         # 获取当前的总价值
         self.value = self.broker.getvalue()
@@ -183,6 +189,8 @@ class MaStrategy(TestStrategyDefault):
         cfg.set_plot(True)
         cfg.set_data_path(
             'datas/TDXStock/tdx/day/sh600026.csv')
+        # cfg.set_data_path(
+        #     'E:/projects/pystock/pystock/tdx/data/tdx/day/sh600026.csv')
         cfg.set_start_date(datetime.now() - relativedelta(years=3))
         cfg.set_end_date(datetime.now())
         return cfg

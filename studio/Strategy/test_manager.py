@@ -58,6 +58,8 @@ class TestManager():
         # 佣金设置
         cerebro.broker.setcommission(self.__commission)
 
+        # cerebro.broker.set_coc(coc=True)
+
         # 设置股票数量(每手)
         cerebro.addsizer(backtrader.sizers.FixedSize, stake=self.__stake_size)
 

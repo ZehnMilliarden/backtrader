@@ -24,7 +24,6 @@ class TdxStrategyConfigImpl(strategy_config.StrategyConfigBase):
         # datafields = [
         #   'datetime', 'open', 'high', 'low', 'close', 'volume', 'openinterest'
         # ]
-
         stock_data_raw = pandas.read_csv(
             self.get_data_path(), index_col='date', parse_dates=True)
 
