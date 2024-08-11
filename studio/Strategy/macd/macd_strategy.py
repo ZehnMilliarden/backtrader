@@ -25,13 +25,15 @@ class MacdStrategy(TestStrategyDefault):
                 self.dataclose, period=self.params.slowPeriod)
         self.ema_fast = backtrader.indicators.EMA(
                 self.dataclose, period=self.params.fastPeriod)
-        
         self.dif = self.ema_fast - self.ema_slow
         self.dea = backtrader.indicators.EMA(
                 self.dif, period=self.params.difPeriod)
 
         self.cross = backtrader.indicators.CrossOver(
                 self.dif, self.dea)
+        
+        self.macd_history = backtrader.indicators.MACDHisto()
+
         self.value = 0
         self.max_value = self.value
         self.min_value = 0

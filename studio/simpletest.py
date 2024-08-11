@@ -7,10 +7,11 @@ from Strategy.demo.test_strategy_b import TestStrategyPlanB
 from Strategy.demo.test_strategy_a import TestStrategyPlanA
 from Strategy.demo.test_strategy_c import TestStrategyPlanC
 from Strategy.ma.ma_strategy import MaStrategy
+from Strategy.macd.macd_strategy import MacdStrategy
 
 if __name__ == '__main__':
     testManager = TestManager()
-    testManager.set_strategy_name(MaStrategy.__name__)
+    testManager.set_strategy_name(MacdStrategy.__name__)
     testManager.set_commission(0.0005)
     testManager.set_stake_size(100)
     testManager.run()
