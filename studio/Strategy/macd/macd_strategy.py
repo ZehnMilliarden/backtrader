@@ -21,27 +21,14 @@ class MacdStrategy(TestStrategyDefault):
         super(MacdStrategy, self).__init__()
 
         self.order = None
-        # self.ema_slow = backtrader.indicators.EMA(self.dataclose, period=self.params.slowPeriod)
-        # self.ema_fast = backtrader.indicators.EMA(self.dataclose, period=self.params.fastPeriod)
-        # self.dif = self.ema_fast - self.ema_slow
-        # self.dea = backtrader.indicators.EMA(self.dif, period=self.params.difPeriod)
-        
-        # self.macd_history = backtrader.indicators.MACDHisto()
-        self.macd = backtrader.indicators.MACD()
+        self.macd = backtrader.indicators.MACDHisto()
 
         self.cross = backtrader.indicators.CrossOver(
                 self.macd.lines.macd, self.macd.lines.signal)
-
-        self.value = 0
-        self.max_value = self.value
-        self.min_value = 0
-        self.buy_value = 0
-        self.win_cnt = 0
-        self.lose_cnt = 0
-        self.increase = 0
-        self.decrease = 0
-        self.busi_cnt = 0
-        self.file_path = ''
+        
+        self.cache_length = 5
+        self.twist_threshold = 0.1
+        self.big_rise_threshold = 0.2
 
     def notify_order(self, order):
 
@@ -68,9 +55,6 @@ class MacdStrategy(TestStrategyDefault):
                           order.executed.value,
                           order.executed.comm
                           ))
-                
-                self.buy_value = self.broker.getvalue()
-                self.busi_cnt += 1
 
             elif order.issell():
 
@@ -81,21 +65,6 @@ class MacdStrategy(TestStrategyDefault):
                           order.executed.price,
                           order.executed.value,
                           order.executed.comm))
-                
-                if self.max_value < self.broker.getvalue():
-                    self.max_value = self.broker.getvalue()
-                    self.min_value = self.max_value
-                elif self.min_value > self.broker.getvalue():
-                    self.min_value = self.broker.getvalue()
-                
-                if self.buy_value < self.broker.getvalue():
-                    self.increase += (self.broker.getvalue() - self.buy_value)
-                    self.win_cnt += 1
-                elif self.buy_value > self.broker.getvalue():
-                    self.decrease += (self.buy_value - self.broker.getvalue())
-                    self.lose_cnt += 1
-                
-                self.buy_value = 0
 
             else:
                 self.log('MaStrategy unrecorgnized order: %s' %
@@ -118,12 +87,38 @@ class MacdStrategy(TestStrategyDefault):
             self.log('Order %s', order.Margin.__str__)
 
         self.order = None
+    
+    def check_has_cross(self):
+        if(self.cross > 0):
+            return True
+    
+        crossed = False
+        for i in range(0 - self.cache_length, -1):
+            if self.macd.lines.histo[i - 1] < 0 and self.macd.lines.histo[i] > 0 :
+                crossed = True
+                break
+
+        return crossed
+
+    def check_is_twisted(self):
+        for i in range(0 - self.cache_length, -1):
+            if abs(self.macd.lines.histo[i]) > self.twist_threshold :
+                return False
+        return True
+    
+    def is_big_rise(self):
+        return self.macd.lines.histo[0] - self.macd.lines.histo[-1] > self.big_rise_threshold
 
     def can_buy(self):
-        return self.cross > 0
+        if self.is_big_rise():
+            return True
+        elif self.check_is_twisted():
+            return False
+        else:
+            return self.check_has_cross()
 
     def can_sell(self):
-        return self.cross < 0
+        return self.cross < 0 or self.check_is_twisted()
 
     def next(self):
         self.log('MaStrategy Close, %.2f' % self.dataclose[0])
@@ -137,14 +132,8 @@ class MacdStrategy(TestStrategyDefault):
         # print('date = %s', dt, self.dif[0], self.dea[0], self.ema_fast[0], self.ema_slow[0])
         if not self.position:
             if self.can_buy():
-                max_price_size = self.get_max_size(self.dataclose[0])
-                rise = (self.dataclose[0] -
-                        self.dataclose[-1]) / self.dataclose[0]
-                print(rise)
-                if rise > 0.9:
-                    price = self.dataclose[0] * (1 + 0.05)
-                    max_price_size = math.floor(
-                        self.broker.get_cash() / 100 / price) * 100
+                max_price_size = math.floor(
+                        self.broker.get_cash() * 0.95 / 100 / self.dataclose[0]) * 100
                 print('%s : buy price: %.2f size: %d' %
                       (dt, self.dataclose[0], max_price_size))
 
@@ -166,28 +155,6 @@ class MacdStrategy(TestStrategyDefault):
         dt2 = dt2 or self.datas[0].datetime.date(0)
         print('%s : End Portfolio Value: %.2f' %
               (dt2.isoformat(), self.value))
-        
-        if self.buy_value != 0:
-            if self.max_value < self.broker.getvalue():
-                self.max_value = self.broker.getvalue()
-                self.min_value = self.max_value
-            elif self.min_value > self.broker.getvalue():
-                self.min_value = self.broker.getvalue()
-                
-            if self.buy_value < self.broker.getvalue():
-                self.increase += (self.broker.getvalue() - self.buy_value)
-                self.win_cnt += 1
-            elif self.buy_value > self.broker.getvalue():
-                self.decrease += (self.buy_value - self.broker.getvalue())
-                self.lose_cnt += 1
-            
-        print('max rollback: %.2f%%\ntotal count: %d\nwin rate: %.2f%%\nearn rate: %.2f\n%.2f\n%.2f' % 
-              ((self.max_value - self.min_value) * 100 / self.max_value,
-               self.busi_cnt,
-               self.win_cnt * 100 / (self.win_cnt + self.lose_cnt),
-               self.increase / self.decrease,
-               self.increase,
-               self.decrease))
 
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
