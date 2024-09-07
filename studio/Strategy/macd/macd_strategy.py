@@ -21,18 +21,16 @@ class MacdStrategy(TestStrategyDefault):
         super(MacdStrategy, self).__init__()
 
         self.order = None
-        self.ema_slow = backtrader.indicators.EMA(
-                self.dataclose, period=self.params.slowPeriod)
-        self.ema_fast = backtrader.indicators.EMA(
-                self.dataclose, period=self.params.fastPeriod)
-        self.dif = self.ema_fast - self.ema_slow
-        self.dea = backtrader.indicators.EMA(
-                self.dif, period=self.params.difPeriod)
+        # self.ema_slow = backtrader.indicators.EMA(self.dataclose, period=self.params.slowPeriod)
+        # self.ema_fast = backtrader.indicators.EMA(self.dataclose, period=self.params.fastPeriod)
+        # self.dif = self.ema_fast - self.ema_slow
+        # self.dea = backtrader.indicators.EMA(self.dif, period=self.params.difPeriod)
+        
+        # self.macd_history = backtrader.indicators.MACDHisto()
+        self.macd = backtrader.indicators.MACD()
 
         self.cross = backtrader.indicators.CrossOver(
-                self.dif, self.dea)
-        
-        self.macd_history = backtrader.indicators.MACDHisto()
+                self.macd.lines.macd, self.macd.lines.signal)
 
         self.value = 0
         self.max_value = self.value
@@ -194,7 +192,7 @@ class MacdStrategy(TestStrategyDefault):
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
         cfg.set_plot(True)
-        cfg.set_data_path('D:/Workspace/backtrader/datas/tdx/sh600017.csv')
+        cfg.set_data_path('E:/Workspace/code/backtrader/datas/tdx/sh600580.csv')
         cfg.set_start_date(datetime.now() - relativedelta(years=3))
         cfg.set_end_date(datetime.now())
         return cfg
