@@ -28,6 +28,7 @@ class MacdStrategy(TestStrategyDefault):
         
         self.cache_length = 5
         self.twist_threshold = 0.1
+        self.big_rise_threshold = 0.2
 
     def notify_order(self, order):
 
@@ -104,12 +105,20 @@ class MacdStrategy(TestStrategyDefault):
             if abs(self.macd.lines.histo[i]) > self.twist_threshold :
                 return False
         return True
+    
+    def is_big_rise(self):
+        return self.macd.lines.histo[0] - self.macd.lines.histo[-1] > self.big_rise_threshold
 
     def can_buy(self):
-        return self.check_has_cross()
+        if self.is_big_rise():
+            return True
+        elif self.check_is_twisted():
+            return False
+        else:
+            return self.check_has_cross()
 
     def can_sell(self):
-        return self.cross < 0
+        return self.cross < 0 or self.check_is_twisted()
 
     def next(self):
         self.log('MaStrategy Close, %.2f' % self.dataclose[0])
@@ -146,19 +155,11 @@ class MacdStrategy(TestStrategyDefault):
         dt2 = dt2 or self.datas[0].datetime.date(0)
         print('%s : End Portfolio Value: %.2f' %
               (dt2.isoformat(), self.value))
-            
-        print('max rollback: %.2f%%\ntotal count: %d\nwin rate: %.2f%%\nearn rate: %.2f\n%.2f\n%.2f' % 
-              ((self.max_value - self.min_value) * 100 / self.max_value,
-               self.busi_cnt,
-               self.win_cnt * 100 / (self.win_cnt + self.lose_cnt),
-               self.increase / self.decrease,
-               self.increase,
-               self.decrease))
 
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
         cfg.set_plot(True)
-        cfg.set_data_path('D:/Workspace/backtrader/datas/tdx/sh600017.csv')
+        cfg.set_data_path('D:/Workspace/backtrader/datas/tdx/sh688093.csv')
         cfg.set_start_date(datetime.now() - relativedelta(years=3))
         cfg.set_end_date(datetime.now())
         return cfg
