@@ -7,6 +7,7 @@ from Strategy.strategy_config import StrategyConfigBase
 from Strategy.cfg.tdx_config import TdxStrategyConfigImpl
 import math
 from dateutil.relativedelta import relativedelta
+import numpy
 
 
 class MacdStrategy(TestStrategyDefault):
@@ -29,6 +30,12 @@ class MacdStrategy(TestStrategyDefault):
         self.cache_length = 5
         self.twist_threshold = 0.2
         self.big_rise_threshold = 0.5
+
+        self.near_by = []
+        self.near_len = 9
+
+        self.near_far = []
+        self.far_len = 26
 
     def notify_order(self, order):
 
@@ -125,19 +132,26 @@ class MacdStrategy(TestStrategyDefault):
     def next(self):
         self.log('MaStrategy Close, %.2f' % self.dataclose[0])
 
+        if self.near_by.len() >= self.near_len:
+            self.near_by.pop(0)
+        self.near_by.append(self.dataclose[0])
+        
+        if self.near_far.len() >= self.far_len:
+            self.near_far.pop(0)
+        self.near_far.append(self.dataclose[0])
+
         # 如果之前已经有订单在处理，但是还没处理完，就不再处理新订单 ( 这是当前策略处理的逻辑 )
         if self.order:
             return
 
         # 手里是否有头寸, 如果没有头寸就处理只处理买逻辑, 如果有头寸就处理卖逻辑
         dt = self.data.datetime.date(0).strftime("%Y-%m-%d")
-        # print('date = %s', dt, self.dif[0], self.dea[0], self.ema_fast[0], self.ema_slow[0])
+        print('date = %s', dt, numpy.var(self.near_by), numpy.std(self.near_by))
+        print('datee = %s', dt, numpy.var(self.near_far), numpy.std(self.near_far))
         if not self.position:
             if self.can_buy():
                 max_price_size = math.floor(
                         self.broker.get_cash() * 0.95 / 100 / self.dataclose[0]) * 100
-                print('%s : buy price: %.2f size: %d' %
-                      (dt, self.dataclose[0], max_price_size))
 
                 self.log('BUY CREATE , %.4f, %.1f' %
                          (self.dataclose[0], max_price_size))
@@ -145,8 +159,6 @@ class MacdStrategy(TestStrategyDefault):
                 self.order = self.buy(size=max_price_size)
         else:
             if self.can_sell():
-                print('%s : sell price: %.2f size: %d' %
-                      (dt, self.dataclose[0], self.position.size))
                 self.order = self.sell(size=self.position.size)
 
         # 获取当前的总价值
@@ -155,13 +167,11 @@ class MacdStrategy(TestStrategyDefault):
     def stop(self):
         dt2 = None
         dt2 = dt2 or self.datas[0].datetime.date(0)
-        print('%s : End Portfolio Value: %.2f' %
-              (dt2.isoformat(), self.value))
 
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
         cfg.set_plot(True)
-        cfg.set_data_path('E:/Workspace/code/backtrader/datas/tdx/sh603298.csv')
+        cfg.set_data_path('D:/Workspace/backtrader/datas/tdx/sh603298.csv')
         cfg.set_start_date(datetime.now() - relativedelta(years=3))
         cfg.set_end_date(datetime.now())
         return cfg
