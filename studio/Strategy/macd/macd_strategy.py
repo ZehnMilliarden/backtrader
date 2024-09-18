@@ -8,6 +8,7 @@ from Strategy.cfg.tdx_config import TdxStrategyConfigImpl
 import math
 from dateutil.relativedelta import relativedelta
 import numpy
+import sys
 
 
 class MacdStrategy(TestStrategyDefault):
@@ -32,10 +33,12 @@ class MacdStrategy(TestStrategyDefault):
         self.big_rise_threshold = 0.5
 
         self.near_by = []
-        self.near_len = 9
+        self.near_len = 5
 
         self.near_far = []
-        self.far_len = 26
+        self.far_len = 9
+
+        sys.stdout = open('C:/Users/Kivei/Desktop/macd_var.txt', 'w')
 
     def notify_order(self, order):
 
@@ -107,9 +110,11 @@ class MacdStrategy(TestStrategyDefault):
 
         return crossed
 
-    def check_is_twisted(self):
+    def check_is_twisted(self, rise):
         for i in range(0 - self.cache_length, -1):
-            if abs(self.macd.lines.histo[i]) > self.twist_threshold :
+            if rise and self.macd.lines.histo[i] < self.macd.lines.histo[i - 1] :
+                return False
+            elif (not rise) and self.macd.lines.histo[i] > self.macd.lines.histo[i - 1] :
                 return False
         return True
     
@@ -117,6 +122,7 @@ class MacdStrategy(TestStrategyDefault):
         return self.macd.lines.macd[0] - self.macd.lines.macd[-1] > self.big_rise_threshold
 
     def can_buy(self):
+        #return self.check_is_twisted(True) and self.macd.lines.histo[0] > 0
         return self.cross > 0
         if self.is_big_rise():
             return True
@@ -126,19 +132,20 @@ class MacdStrategy(TestStrategyDefault):
             return self.macd.histo[0] > self.macd.histo[-1]
 
     def can_sell(self):
+        #return self.check_is_twisted(False)
         #return self.cross < 0 #or self.check_is_twisted()
         return self.macd.histo[0] < self.macd.histo[-1]
 
     def next(self):
         self.log('MaStrategy Close, %.2f' % self.dataclose[0])
 
-        if self.near_by.len() >= self.near_len:
+        if len(self.near_by) >= self.near_len:
             self.near_by.pop(0)
-        self.near_by.append(self.dataclose[0])
+        self.near_by.append(self.macd.lines.histo[0])
         
-        if self.near_far.len() >= self.far_len:
+        if len(self.near_far) >= self.far_len:
             self.near_far.pop(0)
-        self.near_far.append(self.dataclose[0])
+        self.near_far.append(self.macd.lines.histo[0])
 
         # 如果之前已经有订单在处理，但是还没处理完，就不再处理新订单 ( 这是当前策略处理的逻辑 )
         if self.order:
@@ -167,11 +174,12 @@ class MacdStrategy(TestStrategyDefault):
     def stop(self):
         dt2 = None
         dt2 = dt2 or self.datas[0].datetime.date(0)
+        sys.stdout = sys.__stdout__
 
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
         cfg.set_plot(True)
-        cfg.set_data_path('D:/Workspace/backtrader/datas/tdx/sh603298.csv')
+        cfg.set_data_path('E:/Workspace/code/backtrader/datas/tdx/sh600850.csv')
         cfg.set_start_date(datetime.now() - relativedelta(years=3))
         cfg.set_end_date(datetime.now())
         return cfg
