@@ -8,6 +8,8 @@ import pandas
 import backtrader
 from Strategy.strategy_config import StrategyConfigBase
 from Strategy.demo.test_strategy_config import TestStrategyConfigImpl
+import os
+import sys
 
 
 class TestManager():
@@ -32,7 +34,7 @@ class TestManager():
         self.__commission = commission
         return True
 
-    def run(self):
+    def run_once(self, dt_file):
         cerebro = backtrader.Cerebro()
 
         strategyManager = TestStrategyManager()
@@ -40,6 +42,7 @@ class TestManager():
 
         test_stategy = strategyManager.GetStrategy()
         strategy_config = test_stategy.get_strategy_config()
+        strategy_config.set_data_path(dt_file)
 
         # 添加策略
         cerebro.addstrategy(
@@ -52,23 +55,62 @@ class TestManager():
         # 添加测试数据
         cerebro.adddata(strategy_config.get_stock_data())
 
-        # 本金设置
+        # 设置
         cerebro.broker.setcash(100000.0)
 
         # 佣金设置
         cerebro.broker.setcommission(self.__commission)
 
-        # 设置股票数量(每手)
+        # 设置数量
         cerebro.addsizer(backtrader.sizers.FixedSize, stake=self.__stake_size)
 
-        print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
+        res = [cerebro.broker.getvalue()]
+        #print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
         cerebro.run()
-        print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+        #print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+        res.append(cerebro.broker.getvalue())
 
         # 可视化画图, 有引入问题, 暂时屏蔽
-        if strategy_config.is_plot() is True:
-            cerebro.plot(style='candle',
-                         barup='red', bardown='green')
+        #if strategy_config.is_plot() is True:
+            #cerebro.plot(style='candle',
+                         #barup='red', bardown='green')
+        return res
+
+    def run(self):
+        
+        tt = 0
+        c = 0
+        dc = 0
+        dir = 'D:/Workspace/backtrader/datas/tdx/'
+        file_list = os.listdir(dir)
+        h = open('macd_var.txt', 'w')
+        for f in file_list:
+            #tf = os.path.abspath(f)
+            tf = os.path.join(dir, f)
+            code: str = f.split('.')[0][2:]
+
+            res = self.run_once(tf)
+
+            sys.stdout = h
+            final = res[1] - res[0]
+            result = 'increase'
+            c += 1
+            if final <= 0:
+                result = 'decrease'
+                dc += 1
+            print(code,'\t%.2f' % final,'\t',result)
+            sys.stdout = sys.__stdout__
+
+            tt += final
+        
+        ic = c - dc
+        sys.stdout = h
+        print('%.2f\t' % tt,'%d\t' % c,'%d\t'% ic ,'%d' % dc)
+        sys.stdout = sys.__stdout__
+
+        print('%.2f\t' % tt,'%d\t' % c,'%d\t'% ic ,'%d' % dc)
+
+        h.close()
 
         return True
 # if __name__ == '__main__':

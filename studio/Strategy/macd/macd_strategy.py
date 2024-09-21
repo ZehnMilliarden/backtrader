@@ -38,7 +38,9 @@ class MacdStrategy(TestStrategyDefault):
         self.near_far = []
         self.far_len = 9
 
-        sys.stdout = open('C:/Users/Kivei/Desktop/macd_var.txt', 'w')
+        self.last_price = 0
+
+        #sys.stdout = open('macd_var.txt', 'w')
 
     def notify_order(self, order):
 
@@ -65,6 +67,8 @@ class MacdStrategy(TestStrategyDefault):
                           order.executed.value,
                           order.executed.comm
                           ))
+                
+                self.last_price = order.executed.price
 
             elif order.issell():
 
@@ -110,19 +114,35 @@ class MacdStrategy(TestStrategyDefault):
 
         return crossed
 
-    def check_is_twisted(self, rise):
-        for i in range(0 - self.cache_length, -1):
-            if rise and self.macd.lines.histo[i] < self.macd.lines.histo[i - 1] :
+    def check_rise_single(self, arr, inc):
+        for i in range(1, len(arr)):
+            if inc and arr[i] < arr[i - 1]:
                 return False
-            elif (not rise) and self.macd.lines.histo[i] > self.macd.lines.histo[i - 1] :
+            elif (not inc) and arr[i] > arr[i - 1]:
                 return False
         return True
+
+    def check_is_twisted(self, inc):
+        subArr = []
+        for i in range(0 - self.cache_length, 0):
+            subArr.append(self.macd.lines.histo[i - 1])
+        return self.check_rise_single(subArr, inc)
+    
+    def is_sub_increasing(self):
+        subArr = []
+        for i in range(0 - self.cache_length, 0):
+            subArr.append(self.macd.lines.histo[i] - self.macd.lines.histo[i - 1])
+        
+        return self.check_rise_single(subArr, True)
     
     def is_big_rise(self):
         return self.macd.lines.macd[0] - self.macd.lines.macd[-1] > self.big_rise_threshold
+    
+    def is_decrease_treshold(self):
+        return self.last_price > 0 and (self.dataclose[0] / self.last_price) <= 0.93
 
     def can_buy(self):
-        #return self.check_is_twisted(True) and self.macd.lines.histo[0] > 0
+        return self.is_sub_increasing() and self.macd.lines.histo[0] > 0
         return self.cross > 0
         if self.is_big_rise():
             return True
@@ -132,8 +152,10 @@ class MacdStrategy(TestStrategyDefault):
             return self.macd.histo[0] > self.macd.histo[-1]
 
     def can_sell(self):
+        if self.is_decrease_treshold():
+            return True;
         #return self.check_is_twisted(False)
-        #return self.cross < 0 #or self.check_is_twisted()
+        return self.cross < 0 #or self.check_is_twisted()
         return self.macd.histo[0] < self.macd.histo[-1]
 
     def next(self):
@@ -153,8 +175,8 @@ class MacdStrategy(TestStrategyDefault):
 
         # 手里是否有头寸, 如果没有头寸就处理只处理买逻辑, 如果有头寸就处理卖逻辑
         dt = self.data.datetime.date(0).strftime("%Y-%m-%d")
-        print('date = %s', dt, numpy.var(self.near_by), numpy.std(self.near_by))
-        print('datee = %s', dt, numpy.var(self.near_far), numpy.std(self.near_far))
+        #print(dt, numpy.var(self.near_by), numpy.std(self.near_by))
+        #print(dt, numpy.var(self.near_far), numpy.std(self.near_far))
         if not self.position:
             if self.can_buy():
                 max_price_size = math.floor(
@@ -174,12 +196,12 @@ class MacdStrategy(TestStrategyDefault):
     def stop(self):
         dt2 = None
         dt2 = dt2 or self.datas[0].datetime.date(0)
-        sys.stdout = sys.__stdout__
+        #sys.stdout = sys.__stdout__
 
     def get_strategy_config() -> StrategyConfigBase:
         cfg = TdxStrategyConfigImpl()
         cfg.set_plot(True)
-        cfg.set_data_path('E:/Workspace/code/backtrader/datas/tdx/sh600850.csv')
+        cfg.set_data_path('D:/Workspace/backtrader/datas/tdx/sh603298.csv')
         cfg.set_start_date(datetime.now() - relativedelta(years=3))
         cfg.set_end_date(datetime.now())
         return cfg
