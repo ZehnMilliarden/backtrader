@@ -20,6 +20,10 @@ class TestManager():
 
     __stake_size = 100
 
+    __data_path = ''
+
+    __final_value = 0
+
     def set_stake_size(self, stake_size):
         self.__stake_size = stake_size
         return True
@@ -31,6 +35,13 @@ class TestManager():
     def set_commission(self, commission):
         self.__commission = commission
         return True
+    
+    def set_data_path(self, data_path):
+        self.__data_path = data_path
+        return True
+    
+    def get_final_value(self):
+        return self.__final_value
 
     def run(self):
         cerebro = backtrader.Cerebro()
@@ -39,7 +50,10 @@ class TestManager():
         strategyManager.SetStrategy(self.__strategy_name)
 
         test_stategy = strategyManager.GetStrategy()
-        strategy_config = test_stategy.get_strategy_config()
+        strategy_config = test_stategy.get_strategy_config()     
+
+        if self.__data_path:
+            strategy_config.set_data_path(self.__data_path)
 
         # 添加策略
         cerebro.addstrategy(
@@ -56,7 +70,7 @@ class TestManager():
         cerebro.broker.setcash(100000.0)
 
         # 佣金设置
-        cerebro.broker.setcommission(self.__commission)
+        # cerebro.broker.setcommission(self.__commission)
 
         # cerebro.broker.set_coc(coc=True)
 
@@ -65,7 +79,8 @@ class TestManager():
 
         print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
         cerebro.run()
-        print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+        self.__final_value = cerebro.broker.getvalue()
+        print('Final Portfolio Value: %.2f' % self.__final_value)
 
         # 可视化画图, 有引入问题, 暂时屏蔽
         if strategy_config.is_plot() is True:
